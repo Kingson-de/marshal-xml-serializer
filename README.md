@@ -1,1 +1,16 @@
-# marshal-xml-serializer
+# Marshal XML Serializer
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/Kingson-de/marshal-xml-serializer/blob/master/LICENSE)
+[![Build Status](https://travis-ci.org/Kingson-de/marshal-xml-serializer.svg?branch=master)](https://travis-ci.org/Kingson-de/marshal-xml-serializer)
+[![Code Coverage](https://scrutinizer-ci.com/g/Kingson-de/marshal-xml-serializer/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/Kingson-de/marshal-xml-serializer/?branch=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Kingson-de/marshal-xml-serializer/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Kingson-de/marshal-xml-serializer/?branch=master)
+
+## Introduction
+
+Marshal is [serializing](https://en.wikipedia.org/wiki/Serialization) / [marshalling](https://en.wikipedia.org/wiki/Marshalling_(computer_science)) data structures to a format that can be used to build messages for transferring data through the wires.
+
+Marshal XML Serializer will directly serialize the data to XML, it is built on top of the [Marshal Serializer](https://github.com/Kingson-de/marshal-serializer).
+
+## License
+
+This project is released under the terms of the [Apache 2.0 license](https://github.com/Kingson-de/marshal-xml-serializer/blob/master/LICENSE).
