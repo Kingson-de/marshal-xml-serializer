@@ -1,5 +1,6 @@
 {
     "name": "kingson-de/marshal-xml-serializer",
+    "description": "Translates data structures to XML.",
     "type": "library",
     "license": "Apache License",
     "authors": [
