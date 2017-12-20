@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<root>
+<root year="2017">
     <id>123</id>
-    <score>3.4</score>
+    <score public="true" highscore="yes">3.4</score>
     <email>kingson@example.org</email>
     <null/>
-    <followers>
-        <username>pfefferkuchenmann</username>
-        <username>lululu</username>
-    </followers>
+    <nicknames>
+        <nickname>pfefferkuchenmann</nickname>
+        <nickname>lululu</nickname>
+    </nicknames>
 </root>

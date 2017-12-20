@@ -14,6 +14,9 @@ use KingsonDe\Marshal\Data\DataStructure;
  */
 class MarshalXml extends Marshal {
 
+    const ATTRIBUTES_KEY = '@attributes';
+    const DATA_KEY       = '@data';
+
     /**
      * @var string
      */
@@ -50,7 +53,17 @@ class MarshalXml extends Marshal {
         \reset($data);
         $rootNode = \key($data);
 
-        $xmlRootNode = $xml->createElement($rootNode);
+        if (isset($data[$rootNode][static::DATA_KEY])) {
+            $xmlRootNode = $xml->createElement($rootNode, static::castValueToString($data[$rootNode][static::DATA_KEY]));
+            unset($data[$rootNode][static::DATA_KEY]);
+        } else {
+            $xmlRootNode = $xml->createElement($rootNode);
+        }
+
+        if (isset($data[$rootNode][static::ATTRIBUTES_KEY])) {
+            static::addAttributes($data[$rootNode][static::ATTRIBUTES_KEY], $xmlRootNode);
+            unset($data[$rootNode][static::ATTRIBUTES_KEY]);
+        }
         $xml->appendChild($xmlRootNode);
 
         static::processNodes($data[$rootNode], $xmlRootNode);
@@ -58,11 +71,23 @@ class MarshalXml extends Marshal {
         return $xml->saveXML();
     }
 
-    protected static function processNodes($nodes, \DOMElement $parentXmlNode) {
+    protected static function processNodes(array $nodes, \DOMElement $parentXmlNode) {
         foreach ($nodes as $node => $value) {
+            $attributes = [];
+
+            if (isset($value[static::ATTRIBUTES_KEY])) {
+                $attributes = $value[static::ATTRIBUTES_KEY];
+                unset($value[static::ATTRIBUTES_KEY]);
+            }
+
+            if (isset($value[static::DATA_KEY])) {
+                $value = $value[static::DATA_KEY];
+            }
+
             // new node with scalar value
             if (\is_scalar($value)) {
-                $xmlNode = $parentXmlNode->ownerDocument->createElement($node, (string)$value);
+                $xmlNode = $parentXmlNode->ownerDocument->createElement($node, static::castValueToString($value));
+                static::addAttributes($attributes, $xmlNode);
                 $parentXmlNode->appendChild($xmlNode);
                 continue;
             }
@@ -75,10 +100,21 @@ class MarshalXml extends Marshal {
 
             // new node that might contain other nodes
             $xmlNode = $parentXmlNode->ownerDocument->createElement($node);
+            static::addAttributes($attributes, $xmlNode);
             $parentXmlNode->appendChild($xmlNode);
             if (\is_array($value)) {
                 static::processNodes($value, $xmlNode);
             }
         }
+    }
+
+    protected static function addAttributes(array $attributes, \DOMElement $xmlNode) {
+        foreach ($attributes as $name => $value) {
+            $xmlNode->setAttribute($name, static::castValueToString($value));
+        }
+    }
+
+    protected static function castValueToString($value): string {
+        return (\is_string($value) ? $value : var_export($value, true));
     }
 }
