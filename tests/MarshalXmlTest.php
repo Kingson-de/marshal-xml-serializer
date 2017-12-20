@@ -69,7 +69,7 @@ class MarshalXmlTest extends TestCase {
     private function createUser() {
         $user            = new \stdClass();
         $user->id        = 123;
-        $user->score     = round(3.4, 1);
+        $user->score     = 3.0;
         $user->email     = 'kingson@example.org';
         $user->nicknames = ['pfefferkuchenmann', 'lululu'];
 
