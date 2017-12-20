@@ -1,0 +1,33 @@
+{
+    "name": "kingson-de/marshal-xml-serializer",
+    "type": "library",
+    "license": "Apache License",
+    "authors": [
+        {
+            "name": "Martin Ossowski",
+            "email": "martin.ossowski@googlemail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "KingsonDe\\Marshal\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "KingsonDe\\Marshal\\": "tests"
+        }
+    },
+    "require": {
+        "php": "^7.0",
+        "kingson-de/marshal-serializer": "^1.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.5"
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test-dbg": "phpdbg -qrr vendor/phpunit/phpunit/phpunit",
+        "quicktest": "phpunit --no-coverage"
+    }
+}

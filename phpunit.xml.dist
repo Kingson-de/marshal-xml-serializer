@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit backupGlobals="false"
+         backupStaticAttributes="false"
+         cacheTokens="true"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         forceCoversAnnotation="false"
+         mapTestClassNameToCoveredClassName="false"
+         processIsolation="false"
+         stopOnError="false"
+         stopOnFailure="false"
+         stopOnIncomplete="false"
+         stopOnSkipped="false"
+         verbose="true"
+         coverage-clover="clover.xml"
+         beStrictAboutTestsThatDoNotTestAnything="false">
+
+    <php>
+        <!-- Active assertions during tests. -->
+        <ini name="assert.active" value="1"/>
+        <!-- Ensure assertion failures are catchable. -->
+        <ini name="assert.bail" value="0"/>
+        <!-- Set error reporting to E_ALL. -->
+        <ini name="error_reporting" value="32767"/>
+        <!-- Do not limit memory during tests. -->
+        <ini name="memory_limit" value="-1"/>
+    </php>
+
+    <logging>
+        <log type="coverage-html" target="./build/clover-html" charset="UTF-8" yui="true" highlight="true" lowUpperBound="35" highLowerBound="70"/>
+        <log type="coverage-clover" target="./build/clover.xml"/>
+        <log type="junit" target="./build/junit.xml" logIncompleteSkipped="false"/>
+        <log type="testdox-html" target="./build/testdox.html"/>
+        <log type="testdox-text" target="./build/testdox.txt"/>
+        <log type="coverage-text" target="php://stdout" showUncoveredFiles="true" showOnlySummary="true"/>
+    </logging>
+
+    <testsuites>
+        <testsuite>
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory>./src</directory>
+        </whitelist>
+    </filter>
+</phpunit>
