@@ -1,6 +1,7 @@
 {
     "name": "kingson-de/marshal-xml-serializer",
-    "description": "Translates data structures to XML.",
+    "description": "Marshal XML Serializer will directly serialize the data to XML, it is built on top of the Marshal Serializer.",
+    "keywords": ["serializer","marshalling","serialization","marshal","mappers","xml"],
     "type": "library",
     "license": "Apache License",
     "authors": [
