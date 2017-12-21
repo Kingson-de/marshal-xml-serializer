@@ -66,6 +66,29 @@ class MarshalXmlTest extends TestCase {
         $this->assertXmlStringEqualsXmlFile(__DIR__ . '/Fixtures/Services.xml', $xml);
     }
 
+    public function testBuildDataStructureIsNull() {
+        $xml = MarshalXml::serializeItemCallable(function () {
+            return null;
+        });
+
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?><root/>', $xml);
+    }
+
+    public function testSettingProlog() {
+        MarshalXml::setVersion('1.1');
+        MarshalXml::setEncoding('ISO-8859-15');
+
+        $xml = MarshalXml::serializeItemCallable(function () {
+            return [
+                'root' => [
+                    'currency' => '€',
+                ]
+            ];
+        });
+
+        $this->assertXmlStringEqualsXmlFile(__DIR__ . '/Fixtures/Currency.xml', $xml);
+    }
+
     private function createUser() {
         $user            = new \stdClass();
         $user->id        = 123;
