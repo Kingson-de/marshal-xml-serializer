@@ -74,6 +74,19 @@ class MarshalXmlTest extends TestCase {
         $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?><root/>', $xml);
     }
 
+    /**
+     * @expectedException \KingsonDe\Marshal\Exception\XmlSerializeException
+     */
+    public function testSerializationFailed() {
+        MarshalXml::serializeItemCallable(function () {
+            return [
+                'malformedXml' => [
+                    '@node' => 'some value',
+                ],
+            ];
+        });
+    }
+
     public function testSettingProlog() {
         MarshalXml::setVersion('1.1');
         MarshalXml::setEncoding('ISO-8859-15');

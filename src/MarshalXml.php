@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace KingsonDe\Marshal;
 
 use KingsonDe\Marshal\Data\DataStructure;
+use KingsonDe\Marshal\Exception\XmlSerializeException;
 
 /**
  * @method static string serializeItem(AbstractMapper $mapper, ...$data)
@@ -38,37 +39,44 @@ class MarshalXml extends Marshal {
     /**
      * @param DataStructure $dataStructure
      * @return string
+     * @throws \KingsonDe\Marshal\Exception\XmlSerializeException
      */
     public static function serialize(DataStructure $dataStructure) {
         $data = static::buildDataStructure($dataStructure);
-        $xml  = new \DOMDocument(static::$version, static::$encoding);
 
-        if (null === $data) {
-            $xmlRootNode = $xml->createElement('root');
+        try {
+            $xml  = new \DOMDocument(static::$version, static::$encoding);
+
+            if (null === $data) {
+                $xmlRootNode = $xml->createElement('root');
+                $xml->appendChild($xmlRootNode);
+
+                return $xml->saveXML();
+            }
+
+            \reset($data);
+            $rootNode = \key($data);
+
+            if (isset($data[$rootNode][static::DATA_KEY])) {
+                $xmlRootNode = $xml->createElement($rootNode, static::castValueToString($data[$rootNode][static::DATA_KEY]));
+                unset($data[$rootNode][static::DATA_KEY]);
+            } else {
+                $xmlRootNode = $xml->createElement($rootNode);
+            }
+
+            if (isset($data[$rootNode][static::ATTRIBUTES_KEY])) {
+                static::addAttributes($data[$rootNode][static::ATTRIBUTES_KEY], $xmlRootNode);
+                unset($data[$rootNode][static::ATTRIBUTES_KEY]);
+            }
             $xml->appendChild($xmlRootNode);
 
+            static::processNodes($data[$rootNode], $xmlRootNode);
+
             return $xml->saveXML();
+        } catch (\Exception $e) {
+            throw new XmlSerializeException($e->getMessage(), $e->getCode(), $e);
         }
 
-        \reset($data);
-        $rootNode = \key($data);
-
-        if (isset($data[$rootNode][static::DATA_KEY])) {
-            $xmlRootNode = $xml->createElement($rootNode, static::castValueToString($data[$rootNode][static::DATA_KEY]));
-            unset($data[$rootNode][static::DATA_KEY]);
-        } else {
-            $xmlRootNode = $xml->createElement($rootNode);
-        }
-
-        if (isset($data[$rootNode][static::ATTRIBUTES_KEY])) {
-            static::addAttributes($data[$rootNode][static::ATTRIBUTES_KEY], $xmlRootNode);
-            unset($data[$rootNode][static::ATTRIBUTES_KEY]);
-        }
-        $xml->appendChild($xmlRootNode);
-
-        static::processNodes($data[$rootNode], $xmlRootNode);
-
-        return $xml->saveXML();
     }
 
     protected static function processNodes(array $nodes, \DOMElement $parentXmlNode) {
