@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace KingsonDe\Marshal;
 
+use KingsonDe\Marshal\Data\Collection;
 use KingsonDe\Marshal\Data\CollectionCallable;
 use KingsonDe\Marshal\Example\Mapper\ArgumentMapper;
 use KingsonDe\Marshal\Example\Mapper\ContainerMapper;
@@ -85,6 +86,33 @@ class MarshalXmlTest extends TestCase {
                 ],
             ];
         });
+    }
+
+    /**
+     * @expectedException \KingsonDe\Marshal\Exception\XmlSerializeException
+     */
+    public function testSerializeWithCollection() {
+        $collection = new Collection(new ArgumentMapper(), [new Service('marshal.mapper.dummy')]);
+
+        MarshalXml::serialize($collection);
+    }
+
+    /**
+     * @expectedException \KingsonDe\Marshal\Exception\XmlSerializeException
+     */
+    public function testCollectionAtRootLevel() {
+        MarshalXml::serializeCollection(new ArgumentMapper(), [new Service('marshal.mapper.dummy')]);
+    }
+
+    /**
+     * @expectedException \KingsonDe\Marshal\Exception\XmlSerializeException
+     */
+    public function testCollectionCallableAtRootLevel() {
+        MarshalXml::serializeCollectionCallable(function (Service $service) {
+            return [
+                'id' => $service->getId(),
+            ];
+        }, [new Service('marshal.mapper.dummy')]);
     }
 
     public function testSettingProlog() {

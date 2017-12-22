@@ -46,9 +46,160 @@ Please check the [Marshal Serializer README](https://github.com/Kingson-de/marsh
 
 The library provides several static methods to create your XML data once you defined the data structures.
 
-More detailed description will be added soon.
+```php
+<?php
 
-Check the `tests/Example` folder for now. 
+use KingsonDe\Marshal\Data\Item;
+use KingsonDe\Marshal\MarshalXml;
+
+$xml = MarshalXml::serialize(new Item($mapper, $model));
+// or
+$xml = MarshalXml::serializeItem($mapper, $model);
+// or
+$xml = MarshalXml::serializeItemCallable(function (User $user) {
+    return [
+        'root' => [
+            'username'  => $user->getUsername(),
+            'email'     => $user->getEmail(),
+            'birthday'  => $user->getBirthday()->format('Y-m-d'),
+            'followers' => count($user->getFollowers()),
+        ],
+    ];
+}, $user);
+```
+
+Be aware `MarshalXml::serializeCollection` and `MarshalXml::serializeCollectionCallable` methods are not available.
+Collections in XML cannot be generated at root level.
+But after defining the root node you can use collections anywhere.
+
+#### How to define XML attributes?
+
+If you are using a concrete implementation that is extending AbstractXmlMapper you can use the `attributes` method.
+
+```php
+<?php
+
+use KingsonDe\Marshal\AbstractXmlMapper;
+
+class RootMapper extends AbstractXmlMapper {
+    
+    public function map(){
+        return [
+            'root' => [
+                $this->attributes() => [
+                    'xmlns' => 'http://example.org/xml',
+                ],
+            ],
+        ];
+    }
+}
+```
+
+If you are using a callable you need to use the `MarshalXml::ATTRIBUTES_KEY` constant.
+
+```php
+<?php
+
+use KingsonDe\Marshal\MarshalXml;
+
+$xml = MarshalXml::serializeItemCallable(function () {
+    return [
+        'root' => [
+            MarshalXml::ATTRIBUTES_KEY => [
+                'xmlns' => 'http://example.org/xml',
+            ],
+        ],
+    ];
+});
+```
+
+This will generate:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<root xmlns="http://example.org/xml"/>
+```
+
+#### How to define XML node values?
+
+This is pretty simple:
+
+```php
+<?php
+
+use KingsonDe\Marshal\MarshalXml;
+
+$xml = MarshalXml::serializeItemCallable(function (User $user) {
+    return [
+        'root' => [
+            'user' => $user->getUsername(),
+        ],
+    ];
+}, $user);
+```
+
+This will generate:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <user>Kingson</user>
+</root>
+```
+
+#### But how to define XML node values if the node also has attributes?
+
+Then you must use the `data` method for concrete Mapper implementations or `MarshalXml::DATA_KEY` for callable.
+
+```php
+<?php
+
+use KingsonDe\Marshal\AbstractXmlMapper;
+
+class UserMapper extends AbstractXmlMapper {
+    
+    public function map(User $user){
+        return [
+            'root' => [
+                'user' => [
+                    $this->attributes() => [
+                        'xmlns' => 'http://example.org/xml',
+                    ],
+                    $this->data() => $user->getUsername(),
+                ],
+            ],
+        ];
+    }
+}
+```
+
+```php
+<?php
+
+use KingsonDe\Marshal\MarshalXml;
+
+$xml = MarshalXml::serializeItemCallable(function (User $user) {
+    return [
+        'root' => [
+            'user' => [
+                MarshalXml::ATTRIBUTES_KEY => [
+                    'xmlns' => 'http://example.org/xml',
+                ],
+                MarshalXml::DATA_KEY => $user->getUsername(),
+            ],
+        ],
+    ];
+}, $user);
+```
+
+This will generate:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <user xmlns="http://example.org/xml">Kingson</user>
+</root>
+```
 
 ## License
 

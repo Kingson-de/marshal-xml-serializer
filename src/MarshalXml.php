@@ -4,14 +4,14 @@ declare(strict_types = 1);
 
 namespace KingsonDe\Marshal;
 
+use KingsonDe\Marshal\Data\Collection;
+use KingsonDe\Marshal\Data\CollectionCallable;
 use KingsonDe\Marshal\Data\DataStructure;
 use KingsonDe\Marshal\Exception\XmlSerializeException;
 
 /**
  * @method static string serializeItem(AbstractMapper $mapper, ...$data)
  * @method static string serializeItemCallable(callable $mappingFunction, ...$data)
- * @method static string serializeCollection(AbstractMapper $mapper, ...$data)
- * @method static string serializeCollectionCallable(callable $mappingFunction, ...$data)
  */
 class MarshalXml extends Marshal {
 
@@ -42,6 +42,10 @@ class MarshalXml extends Marshal {
      * @throws \KingsonDe\Marshal\Exception\XmlSerializeException
      */
     public static function serialize(DataStructure $dataStructure) {
+        if ($dataStructure instanceof Collection || $dataStructure instanceof CollectionCallable) {
+            throw new XmlSerializeException('Collections in XML cannot be generated at root level.');
+        }
+
         $data = static::buildDataStructure($dataStructure);
 
         try {
@@ -76,7 +80,14 @@ class MarshalXml extends Marshal {
         } catch (\Exception $e) {
             throw new XmlSerializeException($e->getMessage(), $e->getCode(), $e);
         }
+    }
 
+    public static function serializeCollection(AbstractMapper $mapper, ...$data) {
+        throw new XmlSerializeException('Collections in XML cannot be generated at root level.');
+    }
+
+    public static function serializeCollectionCallable(callable $mappingFunction, ...$data) {
+        throw new XmlSerializeException('Collections in XML cannot be generated at root level.');
     }
 
     protected static function processNodes(array $nodes, \DOMElement $parentXmlNode) {
