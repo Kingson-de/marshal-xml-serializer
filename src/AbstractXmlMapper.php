@@ -17,4 +17,8 @@ class AbstractXmlMapper extends AbstractMapper {
     protected function data(): string {
         return MarshalXml::DATA_KEY;
     }
+
+    protected function cdata($data): array {
+        return [MarshalXml::CDATA_KEY => $data];
+    }
 }

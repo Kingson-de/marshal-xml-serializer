@@ -17,6 +17,7 @@ class MarshalXml extends Marshal {
 
     const ATTRIBUTES_KEY = '@attributes';
     const DATA_KEY       = '@data';
+    const CDATA_KEY      = '@cdata';
 
     /**
      * @var string
@@ -64,6 +65,11 @@ class MarshalXml extends Marshal {
             if (isset($data[$rootNode][static::DATA_KEY])) {
                 $xmlRootNode = $xml->createElement($rootNode, static::castValueToString($data[$rootNode][static::DATA_KEY]));
                 unset($data[$rootNode][static::DATA_KEY]);
+            } elseif (isset($data[$rootNode][static::CDATA_KEY])) {
+                $xmlRootNode  = $xml->createElement($rootNode);
+                $cdataSection = $xml->createCDATASection(static::castValueToString($data[$rootNode][static::CDATA_KEY]));
+                $xmlRootNode->appendChild($cdataSection);
+                unset($data[$rootNode][static::CDATA_KEY]);
             } else {
                 $xmlRootNode = $xml->createElement($rootNode);
             }
@@ -93,6 +99,7 @@ class MarshalXml extends Marshal {
     protected static function processNodes(array $nodes, \DOMElement $parentXmlNode) {
         foreach ($nodes as $node => $value) {
             $attributes = [];
+            $cdata      = false;
 
             if (isset($value[static::ATTRIBUTES_KEY])) {
                 $attributes = $value[static::ATTRIBUTES_KEY];
@@ -101,11 +108,20 @@ class MarshalXml extends Marshal {
 
             if (isset($value[static::DATA_KEY])) {
                 $value = $value[static::DATA_KEY];
+            } elseif (isset($value[static::CDATA_KEY])) {
+                $value = $value[static::CDATA_KEY];
+                $cdata = true;
             }
 
             // new node with scalar value
             if (\is_scalar($value)) {
-                $xmlNode = $parentXmlNode->ownerDocument->createElement($node, static::castValueToString($value));
+                if ($cdata) {
+                    $xmlNode      = $parentXmlNode->ownerDocument->createElement($node);
+                    $cdataSection = $parentXmlNode->ownerDocument->createCDATASection(static::castValueToString($value));
+                    $xmlNode->appendChild($cdataSection);
+                } else {
+                    $xmlNode = $parentXmlNode->ownerDocument->createElement($node, static::castValueToString($value));
+                }
                 static::addAttributes($attributes, $xmlNode);
                 $parentXmlNode->appendChild($xmlNode);
                 continue;

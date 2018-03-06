@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <container xmlns="http://symfony.com/schema/dic/services" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <parameters>
+        <parameter><![CDATA[some parameter]]></parameter>
+    </parameters>
+
     <services>
+
         <service id="marshal.mapper.container" class="KingsonDe\Marshal\Example\Mapper\ContainerMapper">
             <argument type="service" id="marshal.mapper.argument"/>
             <argument type="service" id="marshal.mapper.service"/>
         </service>
+
         <service id="marshal.mapper.service" class="KingsonDe\Marshal\Example\Mapper\ServiceMapper">
             <argument type="service" id="marshal.mapper.argument"/>
         </service>
+
         <service id="marshal.mapper.argument" class="KingsonDe\Marshal\Example\Mapper\ArgumentMapper"/>
+
     </services>
 </container>

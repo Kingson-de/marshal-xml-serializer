@@ -29,7 +29,7 @@ class MarshalXmlTest extends TestCase {
                         ],
                         MarshalXml::DATA_KEY => $user->score,
                     ],
-                    'email'     => $user->email,
+                    'email'     => [MarshalXml::CDATA_KEY => $user->email],
                     'null'      => null,
                     'nicknames' => new CollectionCallable(function ($nickname) {
                         return [
@@ -113,6 +113,21 @@ class MarshalXmlTest extends TestCase {
                 'id' => $service->getId(),
             ];
         }, [new Service('marshal.mapper.dummy')]);
+    }
+
+    public function testSerializeRootNodeWithCDataSection() {
+        $xml = MarshalXml::serializeItemCallable(function() {
+            return [
+                'root' => [
+                    MarshalXml::CDATA_KEY => 'Hello World!',
+                ],
+            ];
+        });
+
+        $this->assertXmlStringEqualsXmlString(
+            '<?xml version="1.0" encoding="UTF-8"?><root><![CDATA[Hello World!]]></root>',
+            $xml
+        );
     }
 
     public function testSettingProlog() {

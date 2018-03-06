@@ -2,7 +2,7 @@
 <root year="2017">
     <id>123</id>
     <score public="true" highscore="yes">3.0</score>
-    <email>kingson@example.org</email>
+    <email><![CDATA[kingson@example.org]]></email>
     <null/>
     <nicknames>
         <nickname>pfefferkuchenmann</nickname>

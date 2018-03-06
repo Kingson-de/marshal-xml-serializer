@@ -1,7 +1,7 @@
 {
     "name": "kingson-de/marshal-xml-serializer",
     "description": "Marshal XML Serializer will directly serialize the data to XML, it is built on top of the Marshal Serializer.",
-    "keywords": ["serializer","marshalling","serialization","marshal","mappers","xml"],
+    "keywords": ["serializer","marshalling","serialization","marshal","mappers","xml","cdata"],
     "type": "library",
     "license": "Apache License",
     "authors": [
