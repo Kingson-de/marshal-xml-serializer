@@ -49,38 +49,14 @@ class MarshalXml extends Marshal {
 
         $data = static::buildDataStructure($dataStructure);
 
+        if (null === $data) {
+            throw new XmlSerializeException('No data structure.');
+        }
+
         try {
-            $xml  = new \DOMDocument(static::$version, static::$encoding);
+            $xml = new \DOMDocument(static::$version, static::$encoding);
 
-            if (null === $data) {
-                $xmlRootNode = $xml->createElement('root');
-                $xml->appendChild($xmlRootNode);
-
-                return $xml->saveXML();
-            }
-
-            \reset($data);
-            $rootNode = \key($data);
-
-            if (isset($data[$rootNode][static::DATA_KEY])) {
-                $xmlRootNode = $xml->createElement($rootNode, static::castValueToString($data[$rootNode][static::DATA_KEY]));
-                unset($data[$rootNode][static::DATA_KEY]);
-            } elseif (isset($data[$rootNode][static::CDATA_KEY])) {
-                $xmlRootNode  = $xml->createElement($rootNode);
-                $cdataSection = $xml->createCDATASection(static::castValueToString($data[$rootNode][static::CDATA_KEY]));
-                $xmlRootNode->appendChild($cdataSection);
-                unset($data[$rootNode][static::CDATA_KEY]);
-            } else {
-                $xmlRootNode = $xml->createElement($rootNode);
-            }
-
-            if (isset($data[$rootNode][static::ATTRIBUTES_KEY])) {
-                static::addAttributes($data[$rootNode][static::ATTRIBUTES_KEY], $xmlRootNode);
-                unset($data[$rootNode][static::ATTRIBUTES_KEY]);
-            }
-            $xml->appendChild($xmlRootNode);
-
-            static::processNodes($data[$rootNode], $xmlRootNode);
+            static::processNodes($data, $xml);
 
             return $xml->saveXML();
         } catch (\Exception $e) {
@@ -96,60 +72,49 @@ class MarshalXml extends Marshal {
         throw new XmlSerializeException('Collections in XML cannot be generated at root level.');
     }
 
-    protected static function processNodes(array $nodes, \DOMElement $parentXmlNode) {
-        foreach ($nodes as $node => $value) {
-            $attributes = [];
-            $cdata      = false;
+    /**
+     * @param array $nodes
+     * @param \DOMElement|\DOMDocument $parentXmlNode
+     */
+    protected static function processNodes(array $nodes, $parentXmlNode) {
+        $dom = $parentXmlNode->ownerDocument ?? $parentXmlNode;
 
-            if (isset($value[static::ATTRIBUTES_KEY])) {
-                $attributes = $value[static::ATTRIBUTES_KEY];
-                unset($value[static::ATTRIBUTES_KEY]);
-            }
-
-            if (isset($value[static::DATA_KEY])) {
-                $value = $value[static::DATA_KEY];
-            } elseif (isset($value[static::CDATA_KEY])) {
-                $value = $value[static::CDATA_KEY];
-                $cdata = true;
-            }
+        foreach ($nodes as $name => $data) {
+            $node = XmlNodeParser::parseNode($name, $data);
 
             // new node with scalar value
-            if (\is_scalar($value)) {
-                if ($cdata) {
-                    $xmlNode      = $parentXmlNode->ownerDocument->createElement($node);
-                    $cdataSection = $parentXmlNode->ownerDocument->createCDATASection(static::castValueToString($value));
+            if ($node->hasNodeValue()) {
+                if ($node->isCData()) {
+                    $xmlNode      = $dom->createElement($node->getName());
+                    $cdataSection = $dom->createCDATASection($node->getNodeValue());
                     $xmlNode->appendChild($cdataSection);
                 } else {
-                    $xmlNode = $parentXmlNode->ownerDocument->createElement($node, static::castValueToString($value));
+                    $xmlNode = $dom->createElement($node->getName(), $node->getNodeValue());
                 }
-                static::addAttributes($attributes, $xmlNode);
+                static::addAttributes($node, $xmlNode);
                 $parentXmlNode->appendChild($xmlNode);
                 continue;
             }
 
             // node collection of the same type
-            if (\is_int($node)) {
-                static::processNodes($value, $parentXmlNode);
+            if ($node->isCollection()) {
+                static::processNodes($node->getChildrenNodes(), $parentXmlNode);
                 continue;
             }
 
             // new node that might contain other nodes
-            $xmlNode = $parentXmlNode->ownerDocument->createElement($node);
-            static::addAttributes($attributes, $xmlNode);
+            $xmlNode = $dom->createElement($node->getName());
+            static::addAttributes($node, $xmlNode);
             $parentXmlNode->appendChild($xmlNode);
-            if (\is_array($value)) {
-                static::processNodes($value, $xmlNode);
+            if ($node->hasChildrenNodes()) {
+                static::processNodes($node->getChildrenNodes(), $xmlNode);
             }
         }
     }
 
-    protected static function addAttributes(array $attributes, \DOMElement $xmlNode) {
-        foreach ($attributes as $name => $value) {
-            $xmlNode->setAttribute($name, static::castValueToString($value));
+    protected static function addAttributes(XmlNode $node, \DOMElement $xmlNode) {
+        foreach ($node->getAttributes() as $name => $value) {
+            $xmlNode->setAttribute($name, $value);
         }
-    }
-
-    protected static function castValueToString($value): string {
-        return (\is_string($value) ? $value : var_export($value, true));
     }
 }

@@ -67,12 +67,13 @@ class MarshalXmlTest extends TestCase {
         $this->assertXmlStringEqualsXmlFile(__DIR__ . '/Fixtures/Services.xml', $xml);
     }
 
+    /**
+     * @expectedException \KingsonDe\Marshal\Exception\XmlSerializeException
+     */
     public function testBuildDataStructureIsNull() {
-        $xml = MarshalXml::serializeItemCallable(function () {
+        MarshalXml::serializeItemCallable(function () {
             return null;
         });
-
-        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?><root/>', $xml);
     }
 
     /**

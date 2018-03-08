@@ -16,7 +16,7 @@ class ServiceMapper extends AbstractXmlMapper {
                     'id' => $service->getId(),
                     'class' => $service->getClass(),
                 ],
-                $this->data() => $this->collection(new ArgumentMapper(), $service->getArguments()),
+                $this->collection(new ArgumentMapper(), $service->getArguments()),
             ],
         ];
     }

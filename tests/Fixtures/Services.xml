@@ -2,7 +2,8 @@
 <container xmlns="http://symfony.com/schema/dic/services" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     <parameters>
-        <parameter><![CDATA[some parameter]]></parameter>
+        <parameter><![CDATA[param1]]></parameter>
+        <parameter><![CDATA[param2]]></parameter>
     </parameters>
 
     <services>
