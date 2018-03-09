@@ -8,9 +8,14 @@ use KingsonDe\Marshal\AbstractXmlMapper;
 
 class ParameterMapper extends AbstractXmlMapper {
 
-    public function map(string $parameter) {
+    public function map(array $parameterData) {
         return [
-            'parameter' => $this->cdata($parameter),
+            'parameter' => [
+                $this->attributes() => [
+                    'key' => $parameterData['key'],
+                ],
+                $this->cdata() => $parameterData['param'],
+            ]
         ];
     }
 }

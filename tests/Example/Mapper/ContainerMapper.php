@@ -16,7 +16,10 @@ class ContainerMapper extends AbstractXmlMapper {
                     'xmlns'              => 'http://symfony.com/schema/dic/services',
                     'xmlns:xsi'          => 'http://www.w3.org/2001/XMLSchema-instance',
                 ],
-                'parameters' => $this->collection(new ParameterMapper(), ['param1', 'param2']),
+                'parameters' => $this->collection(new ParameterMapper(), [
+                    ['key' => 'key1', 'param' => 'param1'],
+                    ['key' => 'key2', 'param' => 'param2'],
+                ]),
                 'services'   => $this->collection(new ServiceMapper(), $services),
             ],
         ];

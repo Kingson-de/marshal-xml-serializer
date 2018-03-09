@@ -147,9 +147,55 @@ This will generate:
 </root>
 ```
 
+#### How to define XML node values as CDATA?
+
+Then you must use the `cdata` method for concrete Mapper implementations or `MarshalXml::CDATA_KEY` for callable.
+
+```php
+<?php
+
+use KingsonDe\Marshal\AbstractXmlMapper;
+
+class UserMapper extends AbstractXmlMapper {
+    
+    public function map(User $user){
+        return [
+            'root' => [
+                'user' => $this->cdata($user->getUsername()),
+            ],
+        ];
+    }
+}
+```
+
+```php
+<?php
+
+use KingsonDe\Marshal\MarshalXml;
+
+$xml = MarshalXml::serializeItemCallable(function (User $user) {
+    return [
+        'root' => [
+            'user' => [
+                MarshalXml::CDATA_KEY => $user->getUsername(),
+            ],
+        ],
+    ];
+}, $user);
+```
+
+This will generate:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <user><![CDATA[Kingson]]></user>
+</root>
+```
+
 #### But how to define XML node values if the node also has attributes?
 
-Then you must use the `data` method for concrete Mapper implementations or `MarshalXml::DATA_KEY` for callable.
+Then you must use the `data` \/ `cdata` method for concrete Mapper implementations or `MarshalXml::DATA_KEY` \/ `MarshalXml::CDATA_KEY` for callable.
 
 ```php
 <?php
@@ -166,6 +212,12 @@ class UserMapper extends AbstractXmlMapper {
                         'xmlns' => 'http://example.org/xml',
                     ],
                     $this->data() => $user->getUsername(),
+                ],
+                'userCDATA' => [
+                    $this->attributes() => [
+                        'xmlns' => 'http://example.org/xml',
+                    ],
+                    $this->cdata() => $user->getUsername(),
                 ],
             ],
         ];
@@ -187,6 +239,12 @@ $xml = MarshalXml::serializeItemCallable(function (User $user) {
                 ],
                 MarshalXml::DATA_KEY => $user->getUsername(),
             ],
+            'userCDATA' => [
+                MarshalXml::ATTRIBUTES_KEY => [
+                    'xmlns' => 'http://example.org/xml',
+                ],
+                MarshalXml::CDATA_KEY => $user->getUsername(),
+            ],
         ],
     ];
 }, $user);
@@ -198,6 +256,7 @@ This will generate:
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
   <user xmlns="http://example.org/xml">Kingson</user>
+  <userCDATA xmlns="http://example.org/xml"><![CDATA[Kingson]]></userCDATA>
 </root>
 ```
 
