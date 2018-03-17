@@ -7,6 +7,8 @@ namespace KingsonDe\Marshal;
 use KingsonDe\Marshal\Data\Collection;
 use KingsonDe\Marshal\Data\CollectionCallable;
 use KingsonDe\Marshal\Data\DataStructure;
+use KingsonDe\Marshal\Data\FlexibleData;
+use KingsonDe\Marshal\Exception\XmlDeserializeException;
 use KingsonDe\Marshal\Exception\XmlSerializeException;
 
 /**
@@ -116,5 +118,123 @@ class MarshalXml extends Marshal {
         foreach ($node->getAttributes() as $name => $value) {
             $xmlNode->setAttribute($name, $value);
         }
+    }
+
+    /**
+     * @param string $xml
+     * @return FlexibleData
+     * @throws \KingsonDe\Marshal\Exception\XmlDeserializeException
+     */
+    public static function deserializeXmlToData(string $xml): FlexibleData {
+        try {
+            $dom = new \DOMDocument();
+            $dom->loadXML($xml);
+            $data = [];
+
+            static::deserializeNodes($dom, $data);
+
+            // get namespaces
+            $xpath = new \DOMXPath($dom);
+            foreach ($xpath->query('namespace::*') as $namespace) {
+                if ($namespace->nodeName !== 'xmlns:xml') {
+                    $data[$dom->firstChild->nodeName][static::ATTRIBUTES_KEY][$namespace->nodeName]
+                        = $namespace->nodeValue;
+                }
+            }
+        } catch (\Exception $e) {
+            throw new XmlDeserializeException($e->getMessage(), $e->getCode(), $e);
+        }
+
+        return new FlexibleData($data);
+    }
+
+    /**
+     * @param \DOMElement|\DOMDocument $parentXmlNode
+     * @param array $data
+     */
+    protected static function deserializeNodes($parentXmlNode, array &$data) {
+        $isCollection = static::isCollection($parentXmlNode);
+
+        foreach ($parentXmlNode->childNodes as $node) {
+            if ($node instanceof \DOMText) {
+                if (isset($data[static::ATTRIBUTES_KEY])) {
+                    $data[static::DATA_KEY] = $node->textContent;
+                } else {
+                    $data = $node->textContent;
+                }
+            }
+
+            if ($node instanceof \DOMCdataSection) {
+                $data[static::CDATA_KEY] = $node->data;
+            }
+
+            if ($node instanceof \DOMElement) {
+                $value = [];
+
+                if ($node->hasAttributes()) {
+                    foreach ($node->attributes as $attribute) {
+                        $value[static::ATTRIBUTES_KEY][$attribute->name] = $attribute->value;
+                    }
+                }
+
+                if ($isCollection) {
+                    $i = \count($data);
+
+                    $data[$i][$node->nodeName] = $value;
+
+                    if ($node->hasChildNodes()) {
+                        static::deserializeNodes($node, $data[$i][$node->nodeName]);
+                    }
+                } else {
+                    $data[$node->nodeName] = $value;
+
+                    if ($node->hasChildNodes()) {
+                        static::deserializeNodes($node, $data[$node->nodeName]);
+                    }
+                }
+            }
+        }
+    }
+
+    protected static function isCollection($node) {
+        if ($node->hasChildNodes()) {
+            $name = '';
+
+            foreach ($node->childNodes as $c) {
+                if ($c->nodeType == XML_ELEMENT_NODE) {
+                    if (empty($name)) {
+                        $name = $c->nodeName;
+                        continue;
+                    }
+
+                    return $name === $c->nodeName;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param string $xml
+     * @param AbstractObjectMapper $mapper
+     * @return mixed
+     */
+    public static function deserializeXml(
+        string $xml,
+        AbstractObjectMapper $mapper
+    ) {
+        return $mapper->map(static::deserializeXmlToData($xml));
+    }
+
+    /**
+     * @param string $xml
+     * @param callable $mappingFunction
+     * @return mixed
+     */
+    public static function deserializeXmlCallable(
+        string $xml,
+        callable $mappingFunction
+    ) {
+        return $mappingFunction(static::deserializeXmlToData($xml));
     }
 }

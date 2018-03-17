@@ -131,6 +131,16 @@ class MarshalXmlTest extends TestCase {
         );
     }
 
+    public function testDeserialize() {
+        $xml = MarshalXml::serializeItem(new ContainerMapper(), ...$this->getServices());
+
+        $flexibleData = MarshalXml::deserializeXmlToData($xml);
+
+        $newXml = MarshalXml::serialize($flexibleData);
+
+        $this->assertXmlStringEqualsXmlString($xml, $newXml);
+    }
+
     public function testSettingProlog() {
         MarshalXml::setVersion('1.1');
         MarshalXml::setEncoding('ISO-8859-15');

@@ -22,7 +22,7 @@
     },
     "require": {
         "php": "^7.0",
-        "kingson-de/marshal-serializer": "^1.2"
+        "kingson-de/marshal-serializer": "dev-deserializer as 1.3"
     },
     "require-dev": {
         "phpunit/phpunit": "^6.5"
