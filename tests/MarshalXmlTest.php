@@ -10,6 +10,7 @@ use KingsonDe\Marshal\Example\Mapper\ArgumentMapper;
 use KingsonDe\Marshal\Example\Mapper\ContainerMapper;
 use KingsonDe\Marshal\Example\Mapper\ServiceMapper;
 use KingsonDe\Marshal\Example\Model\Service;
+use KingsonDe\Marshal\Example\ObjectMapper\AcmeExampleIdMapper;
 use PHPUnit\Framework\TestCase;
 
 class MarshalXmlTest extends TestCase {
@@ -131,7 +132,7 @@ class MarshalXmlTest extends TestCase {
         );
     }
 
-    public function testDeserialize() {
+    public function testDeserializeMapperGeneratedXml() {
         $xml = MarshalXml::serializeItem(new ContainerMapper(), ...$this->getServices());
 
         $flexibleData = MarshalXml::deserializeXmlToData($xml);
@@ -139,6 +140,24 @@ class MarshalXmlTest extends TestCase {
         $newXml = MarshalXml::serialize($flexibleData);
 
         $this->assertXmlStringEqualsXmlString($xml, $newXml);
+    }
+
+    public function testDeserializeXmlFile() {
+        $xml = file_get_contents(__DIR__ . '/Fixtures/Breakfast.xml');
+
+        $flexibleData = MarshalXml::deserializeXmlToData($xml);
+
+        $newXml = MarshalXml::serialize($flexibleData);
+
+        $this->assertXmlStringEqualsXmlString($xml, $newXml);
+    }
+
+    public function testDeserializeToString() {
+        $xml = file_get_contents(__DIR__ . '/Fixtures/Services.xml');
+
+        $id = MarshalXml::deserializeXml($xml, new AcmeExampleIdMapper());
+
+        $this->assertSame('$bi*"h\'g7?kj*ee', $id);
     }
 
     public function testSettingProlog() {

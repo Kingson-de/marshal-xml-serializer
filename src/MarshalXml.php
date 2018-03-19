@@ -153,15 +153,11 @@ class MarshalXml extends Marshal {
      * @param array $data
      */
     protected static function deserializeNodes($parentXmlNode, array &$data) {
-        $isCollection = static::isCollection($parentXmlNode);
+        $collectionNodeNames = [];
 
         foreach ($parentXmlNode->childNodes as $node) {
             if ($node instanceof \DOMText) {
-                if (isset($data[static::ATTRIBUTES_KEY])) {
-                    $data[static::DATA_KEY] = $node->textContent;
-                } else {
-                    $data = $node->textContent;
-                }
+                $data[static::DATA_KEY] = $node->textContent;
             }
 
             if ($node instanceof \DOMCdataSection) {
@@ -177,13 +173,22 @@ class MarshalXml extends Marshal {
                     }
                 }
 
-                if ($isCollection) {
-                    $i = \count($data);
+                // move node to collection if it exists twice
+                if (isset($data[$node->nodeName])) {
+                    $previousValue = $data[$node->nodeName];
+                    unset($data[$node->nodeName]);
 
-                    $data[$i][$node->nodeName] = $value;
+                    $data[][$node->nodeName]              = $previousValue;
+                    $collectionNodeNames[$node->nodeName] = true;
+
+                }
+
+                if (isset($collectionNodeNames[$node->nodeName])) {
+                    $data[][$node->nodeName] = $value;
 
                     if ($node->hasChildNodes()) {
-                        static::deserializeNodes($node, $data[$i][$node->nodeName]);
+                        \end($data);
+                        static::deserializeNodes($node, $data[\key($data)][$node->nodeName]);
                     }
                 } else {
                     $data[$node->nodeName] = $value;
@@ -194,24 +199,18 @@ class MarshalXml extends Marshal {
                 }
             }
         }
-    }
 
-    protected static function isCollection($node) {
-        if ($node->hasChildNodes()) {
-            $name = '';
+        if (isset($data[static::DATA_KEY], $data[static::ATTRIBUTES_KEY]) && \count($data) === 2) {
+            return;
+        }
 
-            foreach ($node->childNodes as $c) {
-                if ($c->nodeType == XML_ELEMENT_NODE) {
-                    if (empty($name)) {
-                        $name = $c->nodeName;
-                        continue;
-                    }
-
-                    return $name === $c->nodeName;
-                }
+        if (isset($data[static::DATA_KEY])) {
+            if (\count($data) === 1) {
+                $data = $data[static::DATA_KEY];
+            } else {
+                unset($data[static::DATA_KEY]);
             }
         }
-        return false;
     }
 
     /**
