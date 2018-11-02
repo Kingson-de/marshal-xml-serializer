@@ -10,7 +10,7 @@ use KingsonDe\Marshal\MarshalXml;
 
 class AcmeExampleIdMapper extends AbstractObjectMapper {
 
-    public function map(FlexibleData $flexibleData) {
+    public function map(FlexibleData $flexibleData, ...$additionalData) {
         return $flexibleData
             ->get('container')
             ->get('acme-example:config')

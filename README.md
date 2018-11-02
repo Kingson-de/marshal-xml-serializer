@@ -260,6 +260,50 @@ This will generate:
 </root>
 ```
 
+### Deserializing / Unmarshalling
+
+To transform XML back to your structure use Marshal's deserialize functions.
+You need a class extending the AbstractObjectMapper which will be passed to the deserializeXml function.
+
+```php
+<?php
+
+use KingsonDe\Marshal\AbstractObjectMapper;
+use KingsonDe\Marshal\Data\FlexibleData;
+use KingsonDe\Marshal\MarshalXml;
+
+class AcmeExampleIdMapper extends AbstractObjectMapper {
+
+    public function map(FlexibleData $flexibleData, ...$additionalData) {
+        return $flexibleData
+            ->get('container')
+            ->get('acme-example:config')
+            ->get('acme-example:id')
+            ->get(MarshalXml::CDATA_KEY);
+    }
+}
+```
+
+```php
+<?php
+
+use KingsonDe\Marshal\MarshalXml;
+
+$id = MarshalXml::deserializeXml($xml, new AcmeExampleIdMapper());
+```
+
+Another option would be to use the deserializeCallable function.
+
+```php
+<?php
+
+use KingsonDe\Marshal\MarshalXml;
+
+$id = MarshalXml::deserializeXmlCallable($xml, function (FlexibleData $flexibleData) {
+    return $flexibleData['container']['acme-example:config']['acme-example:id'][MarshalXml::CDATA_KEY];
+});
+```
+
 ## License
 
 This project is released under the terms of the [Apache 2.0 license](https://github.com/Kingson-de/marshal-xml-serializer/blob/master/LICENSE).

@@ -136,7 +136,7 @@ class MarshalXmlTest extends TestCase {
     public function testDeserializeMapperGeneratedXml() {
         $xml = MarshalXml::serializeItem(new ContainerMapper(), ...$this->getServices());
 
-        $flexibleData = MarshalXml::deserializeXmlToData($xml);
+        $flexibleData = new FlexibleData(MarshalXml::deserializeXmlToData($xml));
 
         $newXml = MarshalXml::serialize($flexibleData);
 
@@ -146,7 +146,7 @@ class MarshalXmlTest extends TestCase {
     public function testDeserializeXmlFile() {
         $xml = file_get_contents(__DIR__ . '/Fixtures/Breakfast.xml');
 
-        $flexibleData = MarshalXml::deserializeXmlToData($xml);
+        $flexibleData = new FlexibleData(MarshalXml::deserializeXmlToData($xml));
 
         $newXml = MarshalXml::serialize($flexibleData);
 

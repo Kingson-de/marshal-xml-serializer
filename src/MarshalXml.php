@@ -122,10 +122,10 @@ class MarshalXml extends Marshal {
 
     /**
      * @param string $xml
-     * @return FlexibleData
+     * @return array
      * @throws \KingsonDe\Marshal\Exception\XmlDeserializeException
      */
-    public static function deserializeXmlToData(string $xml): FlexibleData {
+    public static function deserializeXmlToData(string $xml): array {
         try {
             $dom = new \DOMDocument();
             $dom->loadXML($xml);
@@ -145,7 +145,7 @@ class MarshalXml extends Marshal {
             throw new XmlDeserializeException($e->getMessage(), $e->getCode(), $e);
         }
 
-        return new FlexibleData($data);
+        return $data;
     }
 
     /**
@@ -216,24 +216,34 @@ class MarshalXml extends Marshal {
     /**
      * @param string $xml
      * @param AbstractObjectMapper $mapper
+     * @param mixed[] $additionalData
      * @return mixed
      */
     public static function deserializeXml(
         string $xml,
-        AbstractObjectMapper $mapper
+        AbstractObjectMapper $mapper,
+        ...$additionalData
     ) {
-        return $mapper->map(static::deserializeXmlToData($xml));
+        return $mapper->map(
+            new FlexibleData(static::deserializeXmlToData($xml)),
+            ...$additionalData
+        );
     }
 
     /**
      * @param string $xml
      * @param callable $mappingFunction
+     * @param mixed[] $additionalData
      * @return mixed
      */
     public static function deserializeXmlCallable(
         string $xml,
-        callable $mappingFunction
+        callable $mappingFunction,
+        ...$additionalData
     ) {
-        return $mappingFunction(static::deserializeXmlToData($xml));
+        return $mappingFunction(
+            new FlexibleData(static::deserializeXmlToData($xml)),
+            ...$additionalData
+        );
     }
 }
