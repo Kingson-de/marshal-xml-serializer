@@ -6,10 +6,12 @@ namespace KingsonDe\Marshal;
 
 use KingsonDe\Marshal\Data\Collection;
 use KingsonDe\Marshal\Data\CollectionCallable;
+use KingsonDe\Marshal\Data\FlexibleData;
 use KingsonDe\Marshal\Example\Mapper\ArgumentMapper;
 use KingsonDe\Marshal\Example\Mapper\ContainerMapper;
 use KingsonDe\Marshal\Example\Mapper\ServiceMapper;
 use KingsonDe\Marshal\Example\Model\Service;
+use KingsonDe\Marshal\Example\ObjectMapper\AcmeExampleIdMapper;
 use PHPUnit\Framework\TestCase;
 
 class MarshalXmlTest extends TestCase {
@@ -129,6 +131,51 @@ class MarshalXmlTest extends TestCase {
             '<?xml version="1.0" encoding="UTF-8"?><root><![CDATA[Hello World!]]></root>',
             $xml
         );
+    }
+
+    public function testDeserializeMapperGeneratedXml() {
+        $xml = MarshalXml::serializeItem(new ContainerMapper(), ...$this->getServices());
+
+        $flexibleData = new FlexibleData(MarshalXml::deserializeXmlToData($xml));
+
+        $newXml = MarshalXml::serialize($flexibleData);
+
+        $this->assertXmlStringEqualsXmlString($xml, $newXml);
+    }
+
+    public function testDeserializeXmlFile() {
+        $xml = file_get_contents(__DIR__ . '/Fixtures/Breakfast.xml');
+
+        $flexibleData = new FlexibleData(MarshalXml::deserializeXmlToData($xml));
+
+        $newXml = MarshalXml::serialize($flexibleData);
+
+        $this->assertXmlStringEqualsXmlString($xml, $newXml);
+    }
+
+    public function testDeserializeToString() {
+        $xml = file_get_contents(__DIR__ . '/Fixtures/Services.xml');
+
+        $id = MarshalXml::deserializeXml($xml, new AcmeExampleIdMapper());
+
+        $this->assertSame('$bi*"h\'g7?kj*ee', $id);
+    }
+
+    public function testDeserializeWithCallable() {
+        $xml = file_get_contents(__DIR__ . '/Fixtures/Services.xml');
+
+        $id = MarshalXml::deserializeXmlCallable($xml, function (FlexibleData $flexibleData) {
+            return $flexibleData['container']['acme-example:config']['acme-example:id'][MarshalXml::CDATA_KEY];
+        });
+
+        $this->assertSame('$bi*"h\'g7?kj*ee', $id);
+    }
+
+    /**
+     * @expectedException \KingsonDe\Marshal\Exception\XmlDeserializeException
+     */
+    public function testDeserializeInvalidXml() {
+        MarshalXml::deserializeXmlToData('<@brokenXml>nothing</yolo>');
     }
 
     public function testSettingProlog() {

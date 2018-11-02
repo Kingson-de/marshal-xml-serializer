@@ -14,7 +14,7 @@ class ParameterMapper extends AbstractXmlMapper {
                 $this->attributes() => [
                     'key' => $parameterData['key'],
                 ],
-                $this->cdata() => $parameterData['param'],
+                $this->data() => $parameterData['param'],
             ]
         ];
     }

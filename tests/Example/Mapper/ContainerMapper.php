@@ -15,7 +15,9 @@ class ContainerMapper extends AbstractXmlMapper {
                 $this->attributes() => [
                     'xmlns'              => 'http://symfony.com/schema/dic/services',
                     'xmlns:xsi'          => 'http://www.w3.org/2001/XMLSchema-instance',
+                    'xmlns:acme-example' => 'http://example.org/schema/dic/acme_example',
                 ],
+                $this->item(new BundleConfigMapper()),
                 'parameters' => $this->collection(new ParameterMapper(), [
                     ['key' => 'key1', 'param' => 'param1'],
                     ['key' => 'key2', 'param' => 'param2'],
