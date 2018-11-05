@@ -9,9 +9,7 @@
 
 ## Introduction
 
-Marshal is [serializing](https://en.wikipedia.org/wiki/Serialization) / [marshalling](https://en.wikipedia.org/wiki/Marshalling_(computer_science)) data structures to a format that can be used to build messages for transferring data through the wires.
-
-Marshal XML Serializer will directly serialize the data to XML, it is built on top of the [Marshal Serializer](https://github.com/Kingson-de/marshal-serializer).
+Marshal XML is [serializing](https://en.wikipedia.org/wiki/Serialization) / [marshalling](https://en.wikipedia.org/wiki/Marshalling_(computer_science)) data structures to XML. It is also deserializing / unmarshalling XML back to the data structures.
 
 ## Installation
 
