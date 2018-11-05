@@ -22,6 +22,7 @@
     },
     "require": {
         "php": "^7.0",
+        "ext-dom": "*",
         "kingson-de/marshal-serializer": "^1.3"
     },
     "require-dev": {
