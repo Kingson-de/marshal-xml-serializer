@@ -178,6 +178,33 @@ class MarshalXmlTest extends TestCase {
         MarshalXml::deserializeXmlToData('<@brokenXml>nothing</yolo>');
     }
 
+    public function testModifyExistingXml() {
+        $xml = file_get_contents(__DIR__ . '/Fixtures/Breakfast.xml');
+
+        $flexibleData = new FlexibleData(MarshalXml::deserializeXmlToData($xml));
+
+        $waffles = $flexibleData['breakfast_menu'][1];
+        unset($flexibleData['breakfast_menu']);
+        $flexibleData['breakfast_menu'] = $waffles;
+        $flexibleData['breakfast_menu']['food']['price'] = '$8.15';
+
+        $newXml = MarshalXml::serialize($flexibleData);
+
+        $expectedXml = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<breakfast_menu>
+    <food>
+        <name>Strawberry Belgian Waffles</name>
+        <price>$8.15</price>
+        <description>Light Belgian waffles covered with strawberries and whipped cream</description>
+        <calories>900</calories>
+    </food>
+</breakfast_menu>
+XML;
+
+        $this->assertXmlStringEqualsXmlString($expectedXml, $newXml);
+    }
+
     public function testSettingProlog() {
         MarshalXml::setVersion('1.1');
         MarshalXml::setEncoding('ISO-8859-15');

@@ -302,6 +302,26 @@ $id = MarshalXml::deserializeXmlCallable($xml, function (FlexibleData $flexibleD
 });
 ```
 
+### Modify existing XML
+
+An easy way to modify existing XML is to use FlexibleData.
+Here is an example:
+
+```php
+<?php
+
+use KingsonDe\Marshal\Data\FlexibleData;
+use KingsonDe\Marshal\MarshalXml;
+
+$xml = '<?xml version="1.0" encoding="UTF-8"?><root><tag>Hello World!</tag></root>';
+
+$flexibleData = new FlexibleData(MarshalXml::deserializeXmlToData($xml));
+
+$flexibleData['root']['tag'] = 'some other text';
+
+$modifiedXml = MarshalXml::serialize($flexibleData);
+```
+
 ## License
 
 This project is released under the terms of the [Apache 2.0 license](https://github.com/Kingson-de/marshal-xml-serializer/blob/master/LICENSE).
